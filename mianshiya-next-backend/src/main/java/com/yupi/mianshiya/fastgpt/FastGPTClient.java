@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.yupi.mianshiya.fastgpt.model.PaginationRecords;
+import com.yupi.mianshiya.model.dto.fastgpt.ChatRequest;
 import okhttp3.*;
 import com.google.gson.Gson;
 import okio.BufferedSource;
@@ -29,18 +30,18 @@ public class FastGPTClient {
     /**
      * 非流式响应
      *
-     * @param content
+     * @param chatRequest
      */
-    public void normalResponse(String content){
+    public FastGPTResponse normalResponse(ChatRequest chatRequest){
         // 构建请求体
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("chatId", 114513); // 唯一会话ID
+        requestBody.put("chatId", chatRequest.getChatId()); // 唯一会话ID
         requestBody.put("stream", false);
         requestBody.put("detail", false);
 
         // 用户消息
         List<Map<String, String>> messages = new ArrayList<>();
-        messages.add(createMessage("user", content));
+        messages.add(createMessage("user", chatRequest.getContent()));
 
         requestBody.put("messages", messages);
 
@@ -76,27 +77,29 @@ public class FastGPTClient {
                 String answer = result.choices.get(0).message.content;
                 System.out.println("\n最终答案: " + answer);
             }
+            return result;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
 
     /**
      * 流式响应
      *
-     * @param content
+     * @param chatRequest
      */
-    public void streamResponse(String content){
+    public void streamResponse(ChatRequest chatRequest){
         // 构建流式请求体
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("chatId", 114514); // 唯一会话ID
+        requestBody.put("chatId", chatRequest.getChatId()); // 唯一会话ID
         requestBody.put("stream", true); // 启用流式
         requestBody.put("detail", false);
 
         // 用户消息
         List<Map<String, String>> messages = new ArrayList<>();
-        messages.add(createMessage("user", content));
+        messages.add(createMessage("user",  chatRequest.getContent()));
 
         requestBody.put("messages", messages);
 
@@ -234,7 +237,7 @@ public class FastGPTClient {
     }
 
     // 响应对象定义
-    static class FastGPTResponse {
+    public static class FastGPTResponse {
         String id;
         String model;
         Usage usage;
