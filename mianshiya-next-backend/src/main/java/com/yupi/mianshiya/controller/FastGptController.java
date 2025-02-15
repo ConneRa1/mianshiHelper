@@ -3,12 +3,16 @@ package com.yupi.mianshiya.controller;
 import com.yupi.mianshiya.common.BaseResponse;
 import com.yupi.mianshiya.common.ResultUtils;
 import com.yupi.mianshiya.fastgpt.FastGPTClient;
+import com.yupi.mianshiya.fastgpt.model.PaginationRecords;
 import com.yupi.mianshiya.model.dto.fastgpt.ChatRequest;
 import com.yupi.mianshiya.service.UserService;
 import com.yupi.mianshiya.utils.SnowFlakeUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.socket.WebSocketSession;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * ai接口
@@ -44,15 +48,6 @@ public class FastGptController {
         return ResultUtils.success(fastGPTClient.normalResponse(request));
     }
 
-    /**
-     * 流式响应接口
-     *
-     * @param request 用户输入的内容
-     */
-    @PostMapping("/stream-response")
-    public void streamResponse(@RequestParam ChatRequest request) {
-        fastGPTClient.streamResponse(request);
-    }
 
     /**
      * 获取会话历史记录
@@ -61,6 +56,10 @@ public class FastGptController {
      */
     @GetMapping("/pagination-records")
     public void getPaginationRecords(@RequestParam String chatId) {
-        fastGPTClient.getPaginationRecords(chatId);
+        //校验chatid是否属于该用户
+        //校验库里是否有对话记录
+        //从api中去请求获得，存库
+        PaginationRecords paginationRecords = fastGPTClient.getPaginationRecords(chatId);
+
     }
 }

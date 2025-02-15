@@ -9,6 +9,7 @@ import okhttp3.*;
 import com.google.gson.Gson;
 import okio.BufferedSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
 import java.util.*;
@@ -90,7 +91,7 @@ public class FastGPTClient {
      *
      * @param chatRequest
      */
-    public void streamResponse(ChatRequest chatRequest){
+    public void streamResponse(ChatRequest chatRequest, WebSocketSession session){
         // 构建流式请求体
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("chatId", chatRequest.getChatId()); // 唯一会话ID
@@ -142,6 +143,8 @@ public class FastGPTClient {
                             if (json.isEmpty()) continue;
                             if ("[DONE]".equals(json)) {break;}
                             // 解析流式数据块
+
+
                             try {
                                 JsonObject jsonObj = JsonParser.parseString(json).getAsJsonObject();
                                 JsonArray choices = jsonObj.getAsJsonArray("choices");
@@ -182,7 +185,7 @@ public class FastGPTClient {
      *
      * @param chatId
      */
-    public void getPaginationRecords(String chatId){
+    public PaginationRecords getPaginationRecords(String chatId){
         // 构建请求体
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("chatId", chatId);
@@ -223,9 +226,11 @@ public class FastGPTClient {
                     System.out.println("Content: " + value.getText());
                 });
             });
+            return result;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
 
