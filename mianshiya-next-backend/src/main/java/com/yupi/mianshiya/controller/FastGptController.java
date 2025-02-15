@@ -5,6 +5,7 @@ import com.yupi.mianshiya.common.ResultUtils;
 import com.yupi.mianshiya.fastgpt.FastGPTClient;
 import com.yupi.mianshiya.fastgpt.model.PaginationRecords;
 import com.yupi.mianshiya.model.dto.fastgpt.ChatRequest;
+import com.yupi.mianshiya.model.entity.User;
 import com.yupi.mianshiya.service.UserService;
 import com.yupi.mianshiya.utils.SnowFlakeUtil;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.WebSocketSession;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -31,8 +33,11 @@ public class FastGptController {
      *
      * @return chatID
      */
-    public Long generateChatId() {
+
+    public Long newChat(HttpServletRequest request) {
         long chatId = SnowFlakeUtil.nextId();
+        User loginUser = userService.getLoginUser(request);
+
         //插入到用户的会话表中
         return SnowFlakeUtil.nextId(); // 使用 UUID 生成唯一 ID
     }
