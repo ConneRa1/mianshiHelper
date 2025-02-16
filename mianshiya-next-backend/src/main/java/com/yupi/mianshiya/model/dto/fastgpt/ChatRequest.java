@@ -21,4 +21,8 @@ public class ChatRequest implements Serializable {
      * 回答内容
      */
     String content;
+    /**
+     * 分类
+     */
+    String category;
 }

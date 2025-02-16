@@ -65,8 +65,7 @@ public class FastGPTClient {
         requestBody.put("messages", messages);
 
         Map<String, String> variables = new HashMap<>();
-        variables.put("uid", "111111");
-        variables.put("name", "张三");
+        variables.put("category", chatRequest.getCategory());
         requestBody.put("variables", variables);
 
 

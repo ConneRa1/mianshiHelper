@@ -125,7 +125,8 @@ const ChatDialog: React.FC<ChatDialogProps> = ({ open, onClose, category }) => {
       
       const response = await sendMessage({
         chatId,
-        content: inputValue
+        content: inputValue,
+        category: category
       });
       
       if (response?.code === 0 && response?.data) {
