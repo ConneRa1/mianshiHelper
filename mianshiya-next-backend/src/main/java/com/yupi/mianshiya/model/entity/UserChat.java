@@ -40,6 +40,15 @@ public class UserChat implements Serializable {
     private Long chatId;
 
     /**
+     * 标题
+     */
+    private String title;
+    /**
+     * 类别
+     */
+    private String category;
+
+    /**
      * 创建时间
      */
     private Date createTime;

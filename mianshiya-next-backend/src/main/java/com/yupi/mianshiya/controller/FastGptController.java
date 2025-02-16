@@ -1,5 +1,6 @@
 package com.yupi.mianshiya.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yupi.mianshiya.common.BaseResponse;
@@ -23,6 +24,7 @@ import org.springframework.web.socket.WebSocketSession;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Map;
 
 /**
  * ai接口
@@ -44,15 +46,17 @@ public class FastGptController {
      * @return chatID
      */
     @PostMapping("/newChat")
-    public Long newChat(HttpServletRequest request) {
+    public BaseResponse<Long> newChat(@RequestBody Map<String, String> params, HttpServletRequest request) {
+        String category = params.get("category");
         long chatId = SnowFlakeUtil.nextId();
         User loginUser = userService.getLoginUser(request);
         userChatService.save(UserChat.builder()
-        .chatId(chatId)
-        .userId(loginUser.getId())
-        .build());
-        //插入到用户的会话表中
-        return chatId; // 使用 UUID 生成唯一 ID
+            .chatId(chatId)
+            .userId(loginUser.getId())
+            .title(category + SnowFlakeUtil.nextId())
+            .category(category)
+            .build());
+        return ResultUtils.success(chatId);
     }
 
     /**
@@ -64,6 +68,24 @@ public class FastGptController {
     @PostMapping("/normal-response")
     public BaseResponse<String>  normalResponse(@RequestBody ChatRequest request) {
         return ResultUtils.success(fastGPTClient.normalResponse(request));
+    }
+
+    /**
+     * 获取历史的会话
+     *
+     */
+    @GetMapping("/getRecords")
+    public BaseResponse<IPage<UserChat>> getPaginationRecords(@RequestParam(defaultValue = "1") long current,
+                                                                 @RequestParam(defaultValue = "20") long pageSize,
+                                                                 HttpServletRequest request) {
+        // 获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
+
+        //分页查询
+        Page<UserChat> page = new Page<>(current, pageSize);
+        IPage<UserChat> chats =  userChatService.lambdaQuery().eq(UserChat::getUserId, loginUser.getId()).page(page);
+
+        return ResultUtils.success(chats);
     }
 
 

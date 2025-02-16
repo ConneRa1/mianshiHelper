@@ -6,14 +6,16 @@
 
     <resultMap id="BaseResultMap" type="com.yupi.mianshiya.model.entity.UserChat">
             <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="userId" column="userId" jdbcType="VARCHAR"/>
-            <result property="chatId" column="chatID" jdbcType="VARCHAR"/>
+            <result property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="chatId" column="chatId" jdbcType="BIGINT"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
+            <result property="category" column="category" jdbcType="VARCHAR"/>
             <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,userId,chatID,
+        id,userId,chatID,title,category
         createTime,updateTime
     </sql>
 </mapper>
