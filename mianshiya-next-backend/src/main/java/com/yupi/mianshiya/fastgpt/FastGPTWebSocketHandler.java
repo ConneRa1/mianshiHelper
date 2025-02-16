@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.yupi.mianshiya.fastgpt.FastGPTClient;
 import com.yupi.mianshiya.model.dto.fastgpt.ChatRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -17,7 +18,6 @@ import java.util.Map;
 @Component
 @AllArgsConstructor
 public class FastGPTWebSocketHandler extends TextWebSocketHandler {
-
     private final FastGPTClient fastGPTClient;
 
 
@@ -28,7 +28,7 @@ public class FastGPTWebSocketHandler extends TextWebSocketHandler {
 
         String chatId = jsonObject.get("chatId").getAsString(); // 获取 chatId
         String content = jsonObject.get("content").getAsString();
-        ChatRequest request=ChatRequest.builder().chatId(chatId).content(content).build();
+        ChatRequest request=ChatRequest.builder().chatId(Long.valueOf(chatId)).content(content).build();
         // 调用 FastGPT 的流式响应方法
         fastGPTClient.streamResponse(request, session);
     }

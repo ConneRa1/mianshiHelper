@@ -73,8 +73,8 @@ create table if not exists question_bank_question
 
 CREATE TABLE user_chat (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    userId VARCHAR(64) NOT NULL,
-    chatID VARCHAR(64) NOT NULL UNIQUE,
+    userId BIGINT NOT NULL,
+    chatId BIGINT NOT NULL UNIQUE,
     createTime     datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updateTime     datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     INDEX idx_user_id (userId)
@@ -82,10 +82,10 @@ CREATE TABLE user_chat (
 
 CREATE TABLE chat_message (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    chat_id VARCHAR(64) NOT NULL,
+    chatId BIGINT NOT NULL,
     obj VARCHAR(16) NOT NULL,
     content TEXT NOT NULL,
     createTime     datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updateTime     datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
-    INDEX idx_chat_id (chat_id),
+    INDEX idx_chatId (chatId),
 );

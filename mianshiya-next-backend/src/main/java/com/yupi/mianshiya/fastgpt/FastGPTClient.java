@@ -5,6 +5,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.yupi.mianshiya.fastgpt.model.PaginationRecords;
 import com.yupi.mianshiya.model.dto.fastgpt.ChatRequest;
+import com.yupi.mianshiya.model.entity.ChatMessage;
+import com.yupi.mianshiya.service.ChatMessageService;
+import com.yupi.mianshiya.utils.SnowFlakeUtil;
+import lombok.AllArgsConstructor;
 import okhttp3.*;
 import com.google.gson.Gson;
 import okio.BufferedSource;
@@ -16,9 +20,11 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Component
+@AllArgsConstructor
 public class FastGPTClient {
     private static final String API_URL = "https://cloud.fastgpt.cn/api";
     private static final String API_KEY = "fastgpt-d62pufplzv3RRdDJRvNwCXezI4OH6WmygT641748Mj50cyFub1aSVCguUkEJg"; // 注意包含fastgpt-前缀
+    private final ChatMessageService chatMessageService;
 
     // 创建全局的 OkHttpClient 实例
     private static final OkHttpClient client =  new OkHttpClient.Builder()
@@ -33,16 +39,25 @@ public class FastGPTClient {
      *
      * @param chatRequest
      */
-    public FastGPTResponse normalResponse(ChatRequest chatRequest){
+    public String normalResponse(ChatRequest chatRequest){
         // 构建请求体
+        Long chatId = chatRequest.getChatId();
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("chatId", chatRequest.getChatId()); // 唯一会话ID
+        requestBody.put("chatId", chatId); // 唯一会话ID
         requestBody.put("stream", false);
         requestBody.put("detail", false);
+
+        //构造返回体
+        ChatMessage chatMessage = ChatMessage.builder().chatId(chatId).build();
 
         // 用户消息
         List<Map<String, String>> messages = new ArrayList<>();
         messages.add(createMessage("user", chatRequest.getContent()));
+        chatMessage.setId(SnowFlakeUtil.nextId());
+        chatMessage.setObj("Human");
+        chatMessage.setContent(chatRequest.getContent());
+        chatMessageService.save(chatMessage);
+
 
         requestBody.put("messages", messages);
 
@@ -74,11 +89,16 @@ public class FastGPTClient {
 
             // 解析响应
             FastGPTResponse result = new Gson().fromJson(responseBody, FastGPTResponse.class);
+            String answer=null;
             if (result.choices != null && !result.choices.isEmpty()) {
-                String answer = result.choices.get(0).message.content;
+                answer = result.choices.get(0).message.content;
                 System.out.println("\n最终答案: " + answer);
             }
-            return result;
+            chatMessage.setId(SnowFlakeUtil.nextId());
+            chatMessage.setObj("AI");
+            chatMessage.setContent(result.choices.get(0).message.content);
+            chatMessageService.save(chatMessage);
+            return answer;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,11 +118,17 @@ public class FastGPTClient {
         requestBody.put("stream", true); // 启用流式
         requestBody.put("detail", false);
 
+        //构造返回体
+        ChatMessage chatMessage = ChatMessage.builder().chatId(chatRequest.getChatId()).build();
+
         // 用户消息
         List<Map<String, String>> messages = new ArrayList<>();
         messages.add(createMessage("user",  chatRequest.getContent()));
-
         requestBody.put("messages", messages);
+        chatMessage.setId(SnowFlakeUtil.nextId());
+        chatMessage.setObj("Human");
+        chatMessage.setContent(chatRequest.getContent());
+        chatMessageService.save(chatMessage);
 
         // 构建请求
         Request request = new Request.Builder()
@@ -168,15 +194,14 @@ public class FastGPTClient {
                             }
                         }
                     }
-
-                    System.out.println("\n\n完整响应内容：\n" + fullResponse);
+                    chatMessage.setId(SnowFlakeUtil.nextId());
+                    chatMessage.setObj("AI");
+                    chatMessage.setContent(String.valueOf(fullResponse));
+                    chatMessageService.save(chatMessage);
                 }
             }
         });
 
-//        // 保持主线程运行（演示用）
-//        try { Thread.sleep(Long.MAX_VALUE); }
-//        catch (InterruptedException e) { e.printStackTrace(); }
     }
 
 
@@ -231,14 +256,6 @@ public class FastGPTClient {
             e.printStackTrace();
         }
         return null;
-    }
-
-
-
-    public static void main(String[] args) {
-        FastGPTClient client = new FastGPTClient();
-//        client.normalResponse("1.redis的IO模型更高效，使用事件驱动的IO多路复用。2.提供的数据结构更丰富，更好地满足业务需求");
-        client.getPaginationRecords("114513");
     }
 
     // 响应对象定义

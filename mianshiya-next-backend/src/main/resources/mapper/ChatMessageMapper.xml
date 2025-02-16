@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yupi.mianshiya.mapper.ChatMessageMapper">
+
+    <resultMap id="BaseResultMap" type="com.yupi.mianshiya.model.entity.ChatMessage">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="chatId" column="chat_id" jdbcType="BIGINT"/>
+        <result property="obj" column="obj" jdbcType="VARCHAR"/>
+        <result property="content" column="content" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,chat_id,obj,
+        content,create_time,update_time
+    </sql>
+</mapper>
