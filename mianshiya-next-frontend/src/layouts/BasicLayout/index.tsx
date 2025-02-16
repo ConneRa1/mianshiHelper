@@ -56,14 +56,14 @@ export default function BasicLayout({ children }: Props) {
       }}
     >
       <ProLayout
-        title="面试鸭刷题平台"
+        title="面试小帮手"
         layout="top"
         logo={
           <Image
             src="/assets/logo.png"
             height={32}
             width={32}
-            alt="面试鸭刷题网站 - 程序员鱼皮"
+            alt="面试小帮手 - 程序员Conner"
           />
         }
         location={{
@@ -121,7 +121,7 @@ export default function BasicLayout({ children }: Props) {
             <SearchInput key="search" />,
             <a
               key="github"
-              href="https://github.com/liyupi/mianshiya-next"
+              href="https://github.com/ConneRa1/mianshiHelper"
               target="_blank"
             >
               <GithubFilled key="GithubFilled" />
