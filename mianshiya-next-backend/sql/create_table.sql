@@ -79,7 +79,7 @@ CREATE TABLE user_chat (
     category       varchar(256)                       null comment '类别',
     createTime     datetime default CURRENT_TIMESTAMP not null comment '创建时间',
     updateTime     datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
-    INDEX idx_user_id (userId)
+    INDEX index idx_user_category (userId, category),
 );
 
 CREATE TABLE chat_message (

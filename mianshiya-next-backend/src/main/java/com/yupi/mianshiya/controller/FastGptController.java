@@ -39,9 +39,6 @@ public class FastGptController {
     private final UserChatService userChatService;
     private final ChatMessageService chatMessageService;
 
-
-
-
     /**
      * 新建对话
      *
@@ -80,15 +77,16 @@ public class FastGptController {
      *
      */
     @GetMapping("/getRecords")
-    public BaseResponse<IPage<UserChat>> getPaginationRecords(@RequestParam(defaultValue = "1") long current,
-                                                                 @RequestParam(defaultValue = "20") long pageSize,
-                                                                 HttpServletRequest request) {
+    public BaseResponse<IPage<UserChat>> getRecords(@RequestParam String category,
+                                                    @RequestParam(defaultValue = "1") long current,
+                                                    @RequestParam(defaultValue = "20") long pageSize,
+                                                    HttpServletRequest request) {
         // 获取当前登录用户
         User loginUser = userService.getLoginUser(request);
 
         //分页查询
         Page<UserChat> page = new Page<>(current, pageSize);
-        IPage<UserChat> chats =  userChatService.lambdaQuery().eq(UserChat::getUserId, loginUser.getId()).page(page);
+        IPage<UserChat> chats =  userChatService.lambdaQuery().eq(UserChat::getUserId, loginUser.getId()).eq(UserChat::getCategory,category).page(page);
 
         return ResultUtils.success(chats);
     }
