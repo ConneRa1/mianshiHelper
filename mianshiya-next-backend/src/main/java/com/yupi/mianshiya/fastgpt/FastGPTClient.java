@@ -9,6 +9,7 @@ import com.yupi.mianshiya.model.entity.ChatMessage;
 import com.yupi.mianshiya.service.ChatMessageService;
 import com.yupi.mianshiya.utils.SnowFlakeUtil;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import com.google.gson.Gson;
 import okio.BufferedSource;
@@ -19,11 +20,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 @AllArgsConstructor
 public class FastGPTClient {
     private static final String API_URL = "https://cloud.fastgpt.cn/api";
     private static final String API_KEY = "fastgpt-d62pufplzv3RRdDJRvNwCXezI4OH6WmygT641748Mj50cyFub1aSVCguUkEJg"; // 注意包含fastgpt-前缀
+    private static final String APP_ID="67ab40c79404094d7ec91b82";
     private final ChatMessageService chatMessageService;
 
     // 创建全局的 OkHttpClient 实例
@@ -217,7 +220,7 @@ public class FastGPTClient {
         requestBody.put("offset", 0);
         requestBody.put("pageSize", 100);
         requestBody.put("loadCustomFeedbacks", false);
-        requestBody.put("appId", "67ab40c79404094d7ec91b82");
+        requestBody.put("appId",APP_ID);
 
 
         // 发送请求
@@ -252,6 +255,46 @@ public class FastGPTClient {
                 });
             });
             return result;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public ChatMessage initChat(Long chatId){
+        // 发送请求
+        Request request = new Request.Builder()
+                .url(API_URL + "/core/chat/init?appId=" + APP_ID + "&chatId=" + chatId)  // URL 改为 GET 请求
+                .addHeader("Authorization", "Bearer " + API_KEY)
+                .addHeader("Content-Type", "application/json")
+                .get()  // 改为 GET 方法
+                .build();
+
+        // 使用 try-with-resources 关闭 Response
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("请求失败: HTTP " + response.code());
+            }
+
+            String responseBody = response.body().string();
+            log.info(responseBody);
+            // 解析响应
+            JsonObject result = JsonParser.parseString(responseBody).getAsJsonObject();
+            JsonObject data = result.getAsJsonObject("data");  // 获取 data 对象
+
+            // 获取 welcomeText 字段（直接从 app.chatConfig 获取）
+            String welcomeText = data.getAsJsonObject("app")
+                    .getAsJsonObject("chatConfig")
+                    .get("welcomeText").getAsString();  // 直接获取 welcomeText 字段
+
+            ChatMessage chatMessage = ChatMessage.builder().chatId(chatId).build();
+            chatMessage.setId(SnowFlakeUtil.nextId());
+            chatMessage.setObj("AI");
+            chatMessage.setContent(welcomeText);
+            chatMessageService.save(chatMessage);
+            // System.out.println("Welcome Text: " + welcomeText);
+            return chatMessage;  // 返回 welcomeText 字段
         } catch (IOException e) {
             e.printStackTrace();
         }

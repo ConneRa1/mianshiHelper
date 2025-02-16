@@ -40,13 +40,15 @@ public class FastGptController {
     private final ChatMessageService chatMessageService;
 
 
+
+
     /**
-     * 生成唯一的chatId
+     * 新建对话
      *
      * @return chatID
      */
     @PostMapping("/newChat")
-    public BaseResponse<Long> newChat(@RequestBody Map<String, String> params, HttpServletRequest request) {
+    public BaseResponse<ChatMessage> newChat(@RequestBody Map<String, String> params, HttpServletRequest request) {
         String category = params.get("category");
         long chatId = SnowFlakeUtil.nextId();
         User loginUser = userService.getLoginUser(request);
@@ -56,7 +58,10 @@ public class FastGptController {
             .title(category + SnowFlakeUtil.nextId())
             .category(category)
             .build());
-        return ResultUtils.success(chatId);
+        //获得开场白
+        ChatMessage welcomeText = fastGPTClient.initChat(chatId);
+
+        return ResultUtils.success(welcomeText);
     }
 
     /**
