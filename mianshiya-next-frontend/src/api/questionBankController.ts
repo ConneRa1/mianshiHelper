@@ -1,6 +1,8 @@
 // @ts-ignore
 /* eslint-disable */
 import request from '@/libs/request';
+import { BaseResponse, PageResponse } from '@/types/common';
+import type { QuestionBank ,QuestionBankQueryRequest} from '@/types/question';
 
 /** addQuestionBank POST /api/questionBank/add */
 export async function addQuestionBankUsingPost(
@@ -63,19 +65,11 @@ export async function getQuestionBankVoByIdUsingGet(
 }
 
 /** listQuestionBankByPage POST /api/questionBank/list/page */
-export async function listQuestionBankByPageUsingPost(
-  body: API.QuestionBankQueryRequest,
-  options?: { [key: string]: any },
-) {
-  return request<API.BaseResponsePageQuestionBank_>('/api/questionBank/list/page', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  });
-}
+export const listQuestionBankByPageUsingPost = async (
+  params: QuestionBankQueryRequest
+): Promise<BaseResponse<PageResponse<QuestionBank>>> => {
+  return request.post('api/questionBank/list/page', params);
+};
 
 /** listQuestionBankVOByPage POST /api/questionBank/list/page/vo */
 export async function listQuestionBankVoByPageUsingPost(

@@ -22,7 +22,7 @@ public class ChatRequest implements Serializable {
      */
     String content;
     /**
-     * 分类
+     * 对话类别
      */
-    String category;
+    private String category;
 }

@@ -11,6 +11,27 @@ import { PageContainer, ProTable } from "@ant-design/pro-components";
 import { Button, message, Space, Typography } from "antd";
 import React, { useRef, useState } from "react";
 import './index.css';
+import { BaseResponse, PageResponse } from '@/types/common';
+import type { QuestionBank } from '@/types/question';
+import type { SortOrder } from 'antd/es/table/interface';
+
+// 添加类型定义
+interface TableParams {
+  pageSize?: number;
+  current?: number;
+  keyword?: string;
+  [key: string]: any;
+}
+
+interface SortState {
+  [key: string]: SortOrder;
+}
+
+interface RequestData<T> {
+  data: T[];
+  success: boolean;
+  total: number;
+}
 
 /**
  * 题库管理页面
@@ -25,6 +46,8 @@ const QuestionBankAdminPage: React.FC = () => {
   const actionRef = useRef<ActionType>();
   // 当前题库点击的数据
   const [currentRow, setCurrentRow] = useState<API.QuestionBank>();
+  const [data, setData] = useState<API.QuestionBank[]>([]);
+  const [total, setTotal] = useState<number>(0);
 
   /**
    * 删除节点
@@ -124,6 +147,48 @@ const QuestionBankAdminPage: React.FC = () => {
     },
   ];
 
+  const fetchData = async (
+    params: TableParams = {},
+    sort: SortState = {}
+  ): Promise<Partial<RequestData<QuestionBank>>> => {
+    try {
+      const sortField = Object.keys(sort)[0];
+      const sortOrder = sort?.[sortField] ?? undefined;
+
+      const res = await listQuestionBankByPageUsingPost({
+        ...params,
+        sortField,
+        sortOrder,
+      });
+
+      if (res.code === 0) {
+        const { records, total } = res.data;
+        setData(records);
+        setTotal(total);
+        
+        return {
+          data: records,
+          success: true,
+          total: total
+        };
+      } else {
+        message.error('获取题库列表失败');
+        return {
+          data: [],
+          success: false,
+          total: 0
+        };
+      }
+    } catch (error) {
+      message.error('获取题库列表失败');
+      return {
+        data: [],
+        success: false,
+        total: 0
+      };
+    }
+  };
+
   return (
     <PageContainer>
       <ProTable<API.QuestionBank>
@@ -144,23 +209,7 @@ const QuestionBankAdminPage: React.FC = () => {
             <PlusOutlined /> 新建
           </Button>,
         ]}
-        request={async (params, sort, filter) => {
-          const sortField = Object.keys(sort)?.[0];
-          const sortOrder = sort?.[sortField] ?? undefined;
-
-          const { data, code } = await listQuestionBankByPageUsingPost({
-            ...params,
-            sortField,
-            sortOrder,
-            ...filter,
-          } as API.QuestionBankQueryRequest);
-
-          return {
-            success: code === 0,
-            data: data?.records || [],
-            total: Number(data?.total) || 0,
-          };
-        }}
+        request={fetchData}
         columns={columns}
       />
       <CreateModal
