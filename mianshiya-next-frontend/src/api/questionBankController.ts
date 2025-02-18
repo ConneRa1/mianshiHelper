@@ -2,7 +2,6 @@
 /* eslint-disable */
 import request from '@/libs/request';
 import { BaseResponse, PageResponse } from '@/types/common';
-import type { QuestionBank ,QuestionBankQueryRequest} from '@/types/question';
 
 /** addQuestionBank POST /api/questionBank/add */
 export async function addQuestionBankUsingPost(
@@ -66,8 +65,8 @@ export async function getQuestionBankVoByIdUsingGet(
 
 /** listQuestionBankByPage POST /api/questionBank/list/page */
 export const listQuestionBankByPageUsingPost = async (
-  params: QuestionBankQueryRequest
-): Promise<BaseResponse<PageResponse<QuestionBank>>> => {
+  params: API.QuestionBankQueryRequest
+): Promise<BaseResponse<PageResponse<API.QuestionBank>>> => {
   return request.post('api/questionBank/list/page', params);
 };
 

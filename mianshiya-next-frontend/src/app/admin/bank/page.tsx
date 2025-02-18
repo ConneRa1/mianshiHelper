@@ -11,8 +11,6 @@ import { PageContainer, ProTable } from "@ant-design/pro-components";
 import { Button, message, Space, Typography } from "antd";
 import React, { useRef, useState } from "react";
 import './index.css';
-import { BaseResponse, PageResponse } from '@/types/common';
-import type { QuestionBank } from '@/types/question';
 import type { SortOrder } from 'antd/es/table/interface';
 
 // 添加类型定义
@@ -150,7 +148,7 @@ const QuestionBankAdminPage: React.FC = () => {
   const fetchData = async (
     params: TableParams = {},
     sort: SortState = {}
-  ): Promise<Partial<RequestData<QuestionBank>>> => {
+  ): Promise<Partial<RequestData<API.QuestionBank>>> => {
     try {
       const sortField = Object.keys(sort)[0];
       const sortOrder = sort?.[sortField] ?? undefined;
